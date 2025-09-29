@@ -13,15 +13,23 @@ export function AuthProvider({ children }) {
     else localStorage.removeItem('futsal_user')
   }, [user])
 
-  async function login({ email, password }) {
-    // chamar backend real em breve; aqui exemplo com api
-    const res = await api.post('/auth/login', { email, password })
-    // backend deve retornar { user, token }
-    const { user: u, token } = res.data
-    localStorage.setItem('futsal_token', token)
-    setUser(u)
-    return u
+  async function login({ email, password, role }) {
+  if (email === "teste@futsal.com" && password === "123456") {
+    const fakeUser = { 
+      id: 1, 
+      name: "Usuário Teste", 
+      email, 
+      role // 👈 adiciona role fake
+    }
+    const fakeToken = "fake-jwt-token-123"
+
+    localStorage.setItem("futsal_token", fakeToken)
+    setUser(fakeUser)
+    return fakeUser
+  } else {
+    throw new Error("Credenciais inválidas")
   }
+}
 
   function logout() {
     localStorage.removeItem('futsal_token')

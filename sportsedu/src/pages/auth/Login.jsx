@@ -26,15 +26,16 @@ export default function Login(){
   const nav = useNavigate()
 
   async function handleSubmit(e){
-    e.preventDefault()
-    try{
-      await auth.login({ email, password })
-      if (auth.user.role === 'teacher') nav('/teacher')
-      else nav('/parent')
-    }catch(err){
-      console.error(err); alert('Erro ao logar — ver console')
-    }
+  e.preventDefault()
+  try{
+    const loggedUser = await auth.login({ email, password, role }) // 👈 pega o retorno
+    if (loggedUser.role === 'teacher') nav('/teacher')
+    else nav('/parent')
+  }catch(err){
+    console.error(err)
+    alert('Erro ao logar — ver console')
   }
+}
 
   return (
     <Wrap>

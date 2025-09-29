@@ -6,13 +6,30 @@ import TeacherDashboard from './pages/TeacherDashboard'
 import ParentDashboard from './pages/ParentDashboard'
 import ProtectedRoute from './components/ProtectedRoute'
 
-export default function App(){
+export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-      <Route path="/teacher/*" element={<ProtectedRoute role="teacher"><TeacherDashboard/></ProtectedRoute>} />
-      <Route path="/parent/*" element={<ProtectedRoute role="parent"><ParentDashboard/></ProtectedRoute>} />
+      
+      <Route 
+        path="/teacher/*" 
+        element={
+          <ProtectedRoute role="teacher">
+            <TeacherDashboard />
+          </ProtectedRoute>
+        } 
+      />
+      
+      <Route 
+        path="/parent/*" 
+        element={
+          <ProtectedRoute role="parent">
+            <ParentDashboard />
+          </ProtectedRoute>
+        } 
+      />
+      
       <Route path="/" element={<Navigate to="/login" replace />} />
     </Routes>
   )
