@@ -1,30 +1,78 @@
 import React from 'react'
-import styled from 'styled-components'
+import styled, { keyframes } from 'styled-components'
 import { FaHome, FaUsers, FaClipboardList, FaDollarSign } from 'react-icons/fa'
 
+const slideIn = keyframes`
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+`
+const slideOut = keyframes`
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+`
+const fadeIn = keyframes`
+  from { opacity:0; }
+  to { opacity:1; }
+`
+const fadeOut = keyframes`
+  from { opacity:1; }
+  to { opacity:0; }
+`
+
 const Wrap = styled.div`
-  width:220px; background:#071027; height:100vh; padding:24px;
-  display:flex; flex-direction:column; color:#fff;
-  position:fixed; top:0; left:0;
-  transform: ${props => props.open ? 'translateX(0)' : 'translateX(-100%)'};
-  transition: transform 0.3s ease;
+  width:220px; 
+  background:#071027; 
+  height:100vh; 
+  padding:24px;
+  display:flex; 
+  flex-direction:column; 
+  color:#fff;
+  position:fixed; 
+  top:0; 
+  left:0;
   z-index:1000;
   box-shadow: 2px 0 8px rgba(0,0,0,0.4);
+  transform: translateX(${props => props.open ? '0' : '-100%'});
+  animation: ${props => props.open ? slideIn : slideOut} 0.3s forwards;
+  transition: transform 0.3s ease;
 `
+
 const Overlay = styled.div`
   display: ${props => props.open ? 'block' : 'none'};
   position:fixed; top:0; left:0; width:100%; height:100%;
-  background: rgba(0,0,0,0.3); z-index:999;
+  background: rgba(0,0,0,0.3); 
+  z-index:999;
+  animation: ${props => props.open ? fadeIn : fadeOut} 0.3s forwards;
 `
+
 const Logo = styled.div`
-  font-size:20px; font-weight:bold; margin-bottom:32px; text-align:center;
+  font-size:22px; 
+  font-weight:bold; 
+  margin-bottom:32px; 
+  text-align:center;
+  letter-spacing:1px;
+  color: #ffa500;
 `
-const Menu = styled.div`flex:1;`
+
+const Menu = styled.div`flex:1; display:flex; flex-direction:column;`
+
 const MenuItem = styled.div`
-  display:flex; align-items:center; gap:12px; padding:12px 8px; margin-bottom:8px;
-  cursor:pointer; border-radius:8px; transition:0.2s;
-  &:hover { background:#1a1f33; }
-  background: ${props => props.active ? '#1f2745' : 'none'};
+  display:flex; 
+  align-items:center; 
+  gap:12px; 
+  padding:12px 8px; 
+  margin-bottom:8px;
+  cursor:pointer; 
+  border-radius:8px; 
+  transition: all 0.3s ease;
+  background: ${props => props.active ? '#1f2745' : 'transparent'};
+  &:hover {
+    background:#1a1f33;
+    transform: translateX(4px);
+    box-shadow: 2px 2px 8px rgba(255,165,0,0.3);
+  }
+  color: #fff;
+  font-weight: ${props => props.active ? 'bold' : 'normal'};
 `
 
 export default function Sidebar({ open, setOpen, currentTab, setCurrentTab }) {

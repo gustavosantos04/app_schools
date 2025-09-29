@@ -1,8 +1,10 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import styled, { keyframes } from 'styled-components'
 import Sidebar from '../components/Sidebar'
 import CardAction from '../components/CardAction'
 import Table from '../components/Table'
+import Toast from '../components/Toast'
+import FloatingButton from '../components/FloatingButton'
 import { useAuth } from '../contexts/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import { FiPlus, FiEdit, FiFileText, FiDollarSign, FiMenu } from 'react-icons/fi'
@@ -20,15 +22,15 @@ const fadeIn = keyframes`
   from { opacity:0; transform: translateY(20px);}
   to { opacity:1; transform: translateY(0);}
 `
-const AnimatedDiv = styled.div`
-  animation: ${fadeIn} 0.5s ease forwards;
-`
+const AnimatedDiv = styled.div`animation: ${fadeIn} 0.5s ease forwards;`
 
 export default function TeacherDashboard() {
   const { user, logout } = useAuth()
   const nav = useNavigate()
   const [currentTab, setCurrentTab] = useState('dashboard')
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [loadingChart, setLoadingChart] = useState(true)
+  const [toastMsg, setToastMsg] = useState(null)
 
   // fake data
   const turmas = [
@@ -41,12 +43,16 @@ export default function TeacherDashboard() {
     { title:"Pagamento de mensalidade até sexta", date:"2025-09-27" },
   ]
 
-  const handleLogout = () => { logout(); nav('/login') }
-  const handleAction = (msg) => alert(`Em breve: ${msg}`)
-
-  // gráfico de vagas por turma
   const pieData = turmas.map(t => ({ name: t.Nome, value: t.Alunos }))
   const COLORS = ['#0088FE','#00C49F','#FFBB28','#FF8042']
+
+  useEffect(()=>{
+    const timer = setTimeout(()=>setLoadingChart(false), 600)
+    return ()=> clearTimeout(timer)
+  },[])
+
+  const handleLogout = () => { logout(); nav('/login') }
+  const handleAction = (msg) => setToastMsg(msg)
 
   return (
     <Wrap>
@@ -57,7 +63,13 @@ export default function TeacherDashboard() {
             <FiMenu size={28} style={{cursor:'pointer'}} onClick={()=>setSidebarOpen(!sidebarOpen)} />
             <h1 style={{margin:0, fontSize:20}}>Bem-vindo, {user?.name}</h1>
           </div>
-          <button style={{background:'#ff4d4f', color:'#fff', border:'none', borderRadius:8, padding:'8px 16px', cursor:'pointer', fontWeight:'bold'}} onClick={handleLogout}>Sair</button>
+          <button 
+            style={{
+              background:'#ff4d4f', color:'#fff', border:'none', borderRadius:8, 
+              padding:'8px 16px', cursor:'pointer', fontWeight:'bold'
+            }} 
+            onClick={handleLogout}
+          >Sair</button>
         </HeaderWrap>
 
         {currentTab==='dashboard' && (
@@ -71,26 +83,39 @@ export default function TeacherDashboard() {
 
             <div style={{margin:24, height:250, background:'#071027', borderRadius:12, padding:16}}>
               <h3 style={{color:'#fff'}}>Alunos por Turma</h3>
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
-                    {pieData.map((entry,index)=><Cell key={index} fill={COLORS[index % COLORS.length]} />)}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
+              {loadingChart
+                ? <div style={{height:'100%', display:'flex', justifyContent:'center', alignItems:'center', color:'#fff'}}>Carregando gráfico...</div>
+                : <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
+                        {pieData.map((entry,index)=><Cell key={index} fill={COLORS[index % COLORS.length]} />)}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+              }
             </div>
           </AnimatedDiv>
         )}
 
         {currentTab==='turmas' && (
           <AnimatedDiv>
-            <Table columns={['Nome','Vagas','Alunos']} data={turmas} renderActions={(row)=>(
-              <>
-                <button onClick={()=>handleAction(`Editar ${row.Nome}`)}>Editar</button>
-                <button onClick={()=>handleAction(`Abrir vagas ${row.Nome}`)}>Abrir Vagas</button>
-              </>
-            )}/>
+            <Table columns={['Nome','Vagas','Alunos']} data={turmas} renderActions={(row)=>(<>
+              <button 
+                style={{
+                  transition:'0.2s', padding:'4px 8px', borderRadius:6, cursor:'pointer', 
+                  marginRight:4, background:'#1f2745', color:'#fff'
+                }}
+                onClick={()=>handleAction(`Editar ${row.Nome}`)}
+              >Editar</button>
+              <button 
+                style={{
+                  transition:'0.2s', padding:'4px 8px', borderRadius:6, cursor:'pointer', 
+                  background:'#0088FE', color:'#fff'
+                }}
+                onClick={()=>handleAction(`Abrir vagas ${row.Nome}`)}
+              >Abrir Vagas</button>
+            </>)} />
           </AnimatedDiv>
         )}
 
@@ -109,6 +134,10 @@ export default function TeacherDashboard() {
             <p style={{color:'#fff'}}>Funcionalidade em breve</p>
           </AnimatedDiv>
         )}
+
+        {/* Toast e botão flutuante */}
+        {toastMsg && <Toast message={toastMsg} onClose={()=>setToastMsg(null)} />}
+        <FloatingButton onClick={()=>handleAction('Adicionar nova turma')} />
       </Content>
     </Wrap>
   )
