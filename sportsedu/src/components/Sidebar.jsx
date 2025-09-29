@@ -9,6 +9,7 @@ const Wrap = styled.div`
   transform: ${props => props.open ? 'translateX(0)' : 'translateX(-100%)'};
   transition: transform 0.3s ease;
   z-index:1000;
+  box-shadow: 2px 0 8px rgba(0,0,0,0.4);
 `
 const Overlay = styled.div`
   display: ${props => props.open ? 'block' : 'none'};
