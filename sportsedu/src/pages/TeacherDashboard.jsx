@@ -5,21 +5,39 @@ import CardAction from '../components/CardAction'
 import TeacherTurmas from './TeacherTurmas'
 import TeacherComunicados from './TeacherComunicados'
 import TeacherPagamentos from './TeacherPagamentos'
-import Table from '../components/Table'
 import Toast from '../components/Toast'
 import FloatingButton from '../components/FloatingButton'
 import { useAuth } from '../contexts/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import { FiPlus, FiEdit, FiFileText, FiDollarSign, FiMenu } from 'react-icons/fi'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
+import { useTheme } from '../contexts/ThemeContext'
 
-const Wrap = styled.div`display:flex; min-height:100vh; background:#0b1220;`
-const Content = styled.div`flex:1; display:flex; flex-direction:column; transition: margin-left 0.3s;`
-const HeaderWrap = styled.div`
-  display:flex; justify-content:space-between; align-items:center; padding:16px 24px;
-  color:#fff;
+const Wrap = styled.div`
+  display:flex; 
+  min-height:100vh; 
+  background:${props => props.theme.bg};
+  color:${props => props.theme.text};
 `
-const Cards = styled.div`display:flex; gap:16px; margin:16px 24px; flex-wrap:wrap;`
+const Content = styled.div`
+  flex:1; 
+  display:flex; 
+  flex-direction:column; 
+  transition: margin-left 0.3s;
+`
+const HeaderWrap = styled.div`
+  display:flex; 
+  justify-content:space-between; 
+  align-items:center; 
+  padding:16px 24px;
+  color:${props => props.theme.text};
+`
+const Cards = styled.div`
+  display:flex; 
+  gap:16px; 
+  margin:16px 24px; 
+  flex-wrap:wrap;
+`
 
 const fadeIn = keyframes`
   from { opacity:0; transform: translateY(20px);}
@@ -29,6 +47,7 @@ const AnimatedDiv = styled.div`animation: ${fadeIn} 0.5s ease forwards;`
 
 export default function TeacherDashboard() {
   const { user, logout } = useAuth()
+  const { theme, toggleTheme } = useTheme()
   const nav = useNavigate()
   const [currentTab, setCurrentTab] = useState('dashboard')
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -66,13 +85,26 @@ export default function TeacherDashboard() {
             <FiMenu size={28} style={{cursor:'pointer'}} onClick={()=>setSidebarOpen(!sidebarOpen)} />
             <h1 style={{margin:0, fontSize:20}}>Bem-vindo, {user?.name}</h1>
           </div>
-          <button 
-            style={{
-              background:'#ff4d4f', color:'#fff', border:'none', borderRadius:8, 
-              padding:'8px 16px', cursor:'pointer', fontWeight:'bold'
-            }} 
-            onClick={handleLogout}
-          >Sair</button>
+          <div style={{display:'flex', gap:16}}>
+            <button 
+              style={{
+                background:'#ff4d4f', color:'#fff', border:'none', borderRadius:8, 
+                padding:'8px 16px', cursor:'pointer', fontWeight:'bold'
+              }} 
+              onClick={handleLogout}
+            >Sair</button>
+            <button
+              style={{
+                background: theme==='dark' ? '#fff' : '#333',
+                color: theme==='dark' ? '#333' : '#fff',
+                border:'none', borderRadius:8,
+                padding:'8px 16px', cursor:'pointer', fontWeight:'bold'
+              }}
+              onClick={toggleTheme}
+            >
+              {theme==='dark' ? 'Light Mode' : 'Dark Mode'}
+            </button>
+          </div>
         </HeaderWrap>
 
         {currentTab==='dashboard' && (
@@ -84,10 +116,15 @@ export default function TeacherDashboard() {
               <CardAction icon={<FiDollarSign />} label="Pagamentos" onClick={()=>handleAction('Visualizar pagamentos')} />
             </Cards>
 
-            <div style={{margin:24, height:250, background:'#071027', borderRadius:12, padding:16}}>
-              <h3 style={{color:'#fff'}}>Alunos por Turma</h3>
+            <div style={{
+              margin:24, height:250, 
+              background:props=>props.theme.cardBg, 
+              borderRadius:12, padding:16,
+              color:props=>props.theme.text
+            }}>
+              <h3>Alunos por Turma</h3>
               {loadingChart
-                ? <div style={{height:'100%', display:'flex', justifyContent:'center', alignItems:'center', color:'#fff'}}>Carregando gráfico...</div>
+                ? <div style={{height:'100%', display:'flex', justifyContent:'center', alignItems:'center'}}>Carregando gráfico...</div>
                 : <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
@@ -102,24 +139,23 @@ export default function TeacherDashboard() {
         )}
 
         {currentTab==='turmas' && (
-        <TeacherTurmas turmas={turmas} onAction={handleAction} />
-      )}
+          <TeacherTurmas turmas={turmas} onAction={handleAction} />
+        )}
 
         {currentTab==='comunicados' && (
-        <TeacherComunicados 
-          comunicados={comunicados} 
-          onAction={handleAction} 
-        />
-      )}
+          <TeacherComunicados 
+            comunicados={comunicados} 
+            onAction={handleAction} 
+          />
+        )}
 
         {currentTab==='pagamentos' && (
-        <TeacherPagamentos 
-          pagamentos={[]} // por enquanto array vazio, depois conecta ao backend
-          onAction={handleAction} 
-        />
-      )}
+          <TeacherPagamentos 
+            pagamentos={[]} // por enquanto array vazio, depois conecta ao backend
+            onAction={handleAction} 
+          />
+        )}
 
-        {/* Toast e botão flutuante */}
         {toastMsg && <Toast message={toastMsg} onClose={()=>setToastMsg(null)} />}
         <FloatingButton onClick={()=>handleAction('Adicionar nova turma')} />
       </Content>
