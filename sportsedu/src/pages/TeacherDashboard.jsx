@@ -102,7 +102,7 @@ export default function TeacherDashboard() {
         )}
 
         {currentTab==='turmas' && (
-        <TeacherTurmas onAction={handleAction} />
+        <TeacherTurmas turmas={turmas} onAction={handleAction} />
       )}
 
         {currentTab==='comunicados' && (
