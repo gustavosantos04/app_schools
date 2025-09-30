@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react'
 import styled, { keyframes } from 'styled-components'
 import Sidebar from '../components/Sidebar'
 import CardAction from '../components/CardAction'
+import TeacherTurmas from './TeacherTurmas'
+import TeacherComunicados from './TeacherComunicados'
+import TeacherPagamentos from './TeacherPagamentos'
 import Table from '../components/Table'
 import Toast from '../components/Toast'
 import FloatingButton from '../components/FloatingButton'
@@ -99,41 +102,22 @@ export default function TeacherDashboard() {
         )}
 
         {currentTab==='turmas' && (
-          <AnimatedDiv>
-            <Table columns={['Nome','Vagas','Alunos']} data={turmas} renderActions={(row)=>(<>
-              <button 
-                style={{
-                  transition:'0.2s', padding:'4px 8px', borderRadius:6, cursor:'pointer', 
-                  marginRight:4, background:'#1f2745', color:'#fff'
-                }}
-                onClick={()=>handleAction(`Editar ${row.Nome}`)}
-              >Editar</button>
-              <button 
-                style={{
-                  transition:'0.2s', padding:'4px 8px', borderRadius:6, cursor:'pointer', 
-                  background:'#0088FE', color:'#fff'
-                }}
-                onClick={()=>handleAction(`Abrir vagas ${row.Nome}`)}
-              >Abrir Vagas</button>
-            </>)} />
-          </AnimatedDiv>
-        )}
+        <TeacherTurmas onAction={handleAction} />
+      )}
 
         {currentTab==='comunicados' && (
-          <AnimatedDiv style={{margin:16}}>
-            <h2 style={{color:'#fff'}}>Últimos Comunicados</h2>
-            <ul>
-              {comunicados.map((c,i)=><li key={i}><strong>{c.date}:</strong> {c.title}</li>)}
-            </ul>
-          </AnimatedDiv>
-        )}
+        <TeacherComunicados 
+          comunicados={comunicados} 
+          onAction={handleAction} 
+        />
+      )}
 
         {currentTab==='pagamentos' && (
-          <AnimatedDiv style={{margin:16}}>
-            <h2 style={{color:'#fff'}}>Pagamentos Recebidos</h2>
-            <p style={{color:'#fff'}}>Funcionalidade em breve</p>
-          </AnimatedDiv>
-        )}
+        <TeacherPagamentos 
+          pagamentos={[]} // por enquanto array vazio, depois conecta ao backend
+          onAction={handleAction} 
+        />
+      )}
 
         {/* Toast e botão flutuante */}
         {toastMsg && <Toast message={toastMsg} onClose={()=>setToastMsg(null)} />}
