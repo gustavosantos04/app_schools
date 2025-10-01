@@ -1,7 +1,8 @@
 import React from 'react'
 import styled, { keyframes } from 'styled-components'
-import { FaHome, FaUsers, FaClipboardList, FaDollarSign } from 'react-icons/fa'
+import { FaHome, FaClipboardList, FaDollarSign } from 'react-icons/fa'
 
+// animações
 const slideIn = keyframes`
   from { transform: translateX(-100%); }
   to { transform: translateX(0); }
@@ -19,6 +20,7 @@ const fadeOut = keyframes`
   to { opacity:0; }
 `
 
+// estilos
 const Wrap = styled.div`
   width:220px; 
   background:#071027; 
@@ -54,7 +56,11 @@ const Logo = styled.div`
   color: #ffa500;
 `
 
-const Menu = styled.div`flex:1; display:flex; flex-direction:column;`
+const Menu = styled.div`
+  flex:1; 
+  display:flex; 
+  flex-direction:column;
+`
 
 const MenuItem = styled.div`
   display:flex; 
@@ -75,14 +81,25 @@ const MenuItem = styled.div`
   font-weight: ${props => props.active ? 'bold' : 'normal'};
 `
 
-export default function Sidebar({ open, setOpen, currentTab, setCurrentTab }) {
-  const menuItems = [
+export default function Sidebar({ open, setOpen, currentTab, setCurrentTab, user }) {
+  // menu para aluno/pai
+  const alunoMenu = [
     { id: 'dashboard', label:'Dashboard', icon:<FaHome /> },
-    { id: 'turmas', label:'Turmas', icon:<FaUsers /> },
+    { id: 'comunicados', label:'Comunicados', icon:<FaClipboardList /> },
     { id: 'vagas', label:'Vagas', icon:<FaClipboardList /> },
+    { id: 'financeiro', label:'Financeiro', icon:<FaDollarSign /> },
+  ]
+
+  // menu para professor (se precisar manter separado)
+  const professorMenu = [
+    { id: 'dashboard', label:'Dashboard', icon:<FaHome /> },
+    { id: 'turmas', label:'Turmas', icon:<FaClipboardList /> },
     { id: 'comunicados', label:'Comunicados', icon:<FaClipboardList /> },
     { id: 'pagamentos', label:'Pagamentos', icon:<FaDollarSign /> },
   ]
+
+  // decide qual menu usar com base no role do usuário
+  const menuItems = user?.role === 'professor' ? professorMenu : alunoMenu
 
   return (
     <>
