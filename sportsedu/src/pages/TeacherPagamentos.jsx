@@ -172,6 +172,10 @@ const TableTitle = styled.h3`
 const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
 `
 
 const Thead = styled.thead`
@@ -229,6 +233,45 @@ const Badge = styled.span`
     color: ${props.theme.error};
   `}
 `
+
+const MobileCards = styled.div`
+  display: none;
+
+  @media (max-width: 768px) {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 16px;
+  }
+`
+
+const MobileCard = styled.div`
+  background: ${props => props.theme.cardBg};
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid ${props => props.theme.border};
+  box-shadow: ${props => props.theme.shadowSm};
+  color: ${props => props.theme.text};
+`
+
+const CardHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 15px;
+  font-weight: 600;
+`
+
+const CardInfo = styled.p`
+  font-size: 14px;
+  margin: 4px 0;
+  span {
+    font-weight: 600;
+    color: ${props => props.theme.textSecondary};
+  }
+`
+
 
 const EmptyState = styled.div`
   text-align: center;
@@ -502,6 +545,35 @@ export default function TeacherPagamentos({ pagamentos = [], onAction }) {
             )}
           </Tbody>
         </Table>
+
+        {/* 📱 Versão mobile (cards) */}
+<MobileCards>
+  {fakePagamentos.length === 0 ? (
+    <EmptyState>Nenhum pagamento registrado</EmptyState>
+  ) : (
+    fakePagamentos.map((pagamento) => (
+      <MobileCard key={pagamento.id}>
+        <CardHeader>
+          <strong>{pagamento.aluno}</strong>
+          <Badge $status={pagamento.status}>
+            {pagamento.status === 'ok' ? (
+              <>
+                <FiCheckCircle size={12} /> Pago
+              </>
+            ) : (
+              <>
+                <FiClock size={12} /> Pendente
+              </>
+            )}
+          </Badge>
+        </CardHeader>
+        <CardInfo><span>Turma:</span> {pagamento.turma}</CardInfo>
+        <CardInfo><span>Data:</span> {formatDate(pagamento.date)}</CardInfo>
+        <CardInfo><span>Valor:</span> {formatCurrency(pagamento.valor)}</CardInfo>
+      </MobileCard>
+    ))
+  )}
+</MobileCards>
       </TableContainer>
 
       <FloatingButton 
