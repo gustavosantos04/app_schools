@@ -1,0 +1,26 @@
+[
+    {
+        "id": "3e97632e-0f23-4f18-944d-fd6baaf4325e",
+        "nome": "Gustavo",
+        "email": "gustavo@example.com",
+        "senha": "$2b$12$9k7IltEt.UqCyx9OUiLzpeX7dNYCxu3WjhfKUZY02F3JKZGWyRZae",
+        "tipo": "superadmin",
+        "criado_em": "2025-11-10T22:41:54.104690"
+    },
+    {
+        "id": "030835ea-7325-4f65-a8b1-5a6b61642af7",
+        "nome": "Carlos Silva",
+        "email": "carlos.prof@example.com",
+        "senha": "$2b$12$KwZXIekEKyvnQTsLrXXlx.7cvsSzUf8xSKsvR6D4y8EtdWxqIsDDi",
+        "tipo": "professor",
+        "criado_em": "2025-11-10T22:42:07.842330"
+    },
+    {
+        "id": "4ea35df1-5abd-47b5-ae89-15ca99b11387",
+        "nome": "Maria Luiza",
+        "email": "marialuiza@example.com",
+        "senha": "$2b$12$DfboEWk//SNVFlzH83jXY.uVYDOJEbVOKlWj6t9c9mQfXp8TU8qvi",
+        "tipo": "aluno",
+        "criado_em": "2025-11-10T22:42:16.265682"
+    }
+]

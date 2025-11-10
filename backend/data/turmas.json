@@ -1,0 +1,12 @@
+[
+  {
+    "id": "da681c6a-b506-4e38-9d05-76204dc978d8",
+    "nome": "Sub-15",
+    "descricao": "turma dos sub 15",
+    "professor_id": "3e97632e-0f23-4f18-944d-fd6baaf4325e",
+    "alunos": [
+      "4ea35df1-5abd-47b5-ae89-15ca99b11387"
+    ],
+    "criado_em": "2025-11-10T20:00:24.435830"
+  }
+]
