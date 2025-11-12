@@ -1,0 +1,13 @@
+[
+  {
+    "id": "0bbc70d9-d24a-40b9-b4bb-b4a4100a9e91",
+    "turma_id": "da681c6a-b506-4e38-9d05-76204dc978d8",
+    "professor_id": "030835ea-7325-4f65-a8b1-5a6b61642af7",
+    "titulo": "teste",
+    "conteudo": "teste",
+    "midias": [
+      "string"
+    ],
+    "criado_em": "2025-11-12T19:06:06.155994"
+  }
+]
