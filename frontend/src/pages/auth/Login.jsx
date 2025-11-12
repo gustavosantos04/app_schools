@@ -4,6 +4,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { FiMail, FiLock, FiUser, FiArrowRight } from 'react-icons/fi'
 import { IoFootball } from 'react-icons/io5'
+import api from '../../services/api'
 
 const Wrap = styled.div`
   min-height: 100vh;
@@ -262,22 +263,49 @@ const Footer = styled.div`
 export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [role, setRole] = useState('parent')
+  const { setUser } = useAuth()
   const [loading, setLoading] = useState(false)
-  const auth = useAuth()
   const nav = useNavigate()
 
   async function handleSubmit(e) {
     e.preventDefault()
     setLoading(true)
-    
+
     try {
-      const loggedUser = await auth.login({ email, password, role })
-      if (loggedUser.role === 'teacher') nav('/teacher')
-      else nav('/parent')
-    } catch (err) {
-      console.error(err)
-      alert('Erro ao fazer login. Verifique suas credenciais.')
+      const formData = new URLSearchParams()
+      formData.append('username', email)
+      formData.append('password', password)
+
+      // Faz login
+      const { data } = await api.post('/auth/login', formData, {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+      })
+
+      // Salva token e usuário do login
+      localStorage.setItem('futsal_token', data.access_token)
+      api.defaults.headers.common['Authorization'] = `Bearer ${data.access_token}`
+
+      // 🔹 Agora busca dados atualizados do usuário autenticado
+      const { data: me } = await api.get('/auth/me')
+      const user = me.user || me  // cobre ambos os casos (seguro!)
+
+      // Salva e atualiza contexto
+      localStorage.setItem('futsal_user', JSON.stringify(user))
+      setUser(user)
+
+      console.log('Usuário logado:', user)
+
+      // 🔹 Redirecionamento conforme tipo
+      if (user.tipo === 'superadmin' || user.tipo === 'professor') nav('/teacher')
+      else if (user.tipo === 'aluno') nav('/parent')
+      else nav('/')
+    }  catch (err) {
+      console.error('Erro no login:', err)
+      if (err.response?.status === 401) {
+        alert('Credenciais inválidas. Verifique e tente novamente.')
+      } else {
+        alert('Erro ao fazer login. Tente novamente mais tarde.')
+      }
     } finally {
       setLoading(false)
     }
@@ -294,11 +322,11 @@ export default function Login() {
             Conecte professores, alunos e responsáveis em um só lugar.
           </Subtitle>
         </LeftPanel>
-        
+
         <RightPanel>
           <FormTitle>Bem-vindo de volta!</FormTitle>
           <FormSubtitle>Entre com suas credenciais para continuar</FormSubtitle>
-          
+
           <Form onSubmit={handleSubmit}>
             <InputGroup>
               <Label>Email</Label>
@@ -313,7 +341,7 @@ export default function Login() {
                 />
               </InputWrapper>
             </InputGroup>
-            
+
             <InputGroup>
               <Label>Senha</Label>
               <InputWrapper>
@@ -327,24 +355,13 @@ export default function Login() {
                 />
               </InputWrapper>
             </InputGroup>
-            
-            <InputGroup>
-              <Label>Entrar como</Label>
-              <InputWrapper>
-                <InputIcon><FiUser size={18} /></InputIcon>
-                <Select value={role} onChange={e => setRole(e.target.value)}>
-                  <option value="parent">Pai/Responsável ou Aluno</option>
-                  <option value="teacher">Professor</option>
-                </Select>
-              </InputWrapper>
-            </InputGroup>
-            
+
             <Button type="submit" disabled={loading}>
               {loading ? 'Entrando...' : 'Entrar'}
               {!loading && <FiArrowRight size={18} />}
             </Button>
           </Form>
-          
+
           <Footer>
             Não tem uma conta? <Link to="/register">Cadastre-se</Link>
           </Footer>

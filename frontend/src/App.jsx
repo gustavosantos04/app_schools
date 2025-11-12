@@ -23,7 +23,7 @@ function AppWrapper() {
         <Route
           path="/teacher/*"
           element={
-            <ProtectedRoute role="teacher">
+            <ProtectedRoute role="professor">
               <TeacherDashboard />
             </ProtectedRoute>
           }
@@ -32,7 +32,7 @@ function AppWrapper() {
         <Route
           path="/parent/*"
           element={
-            <ProtectedRoute role="parent">
+            <ProtectedRoute role="aluno">
               <ParentDashboard />
             </ProtectedRoute>
           }
