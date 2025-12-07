@@ -5,18 +5,14 @@ import { useTheme } from "../contexts/ThemeContext";
 import { FiMenu, FiSun, FiMoon, FiLogOut } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import styled, { keyframes } from "styled-components";
+import UserModal from "../components/UserModal";
 
 // =========================
-//       ANIMAÇÕES
+//    ANIMAÇÕES
 // =========================
 const fadeIn = keyframes`
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
-`;
-
-const modalFade = keyframes`
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
 `;
 
 // =========================
@@ -49,10 +45,6 @@ const Header = styled.div`
   align-items: center;
   gap: 16px;
   flex-wrap: wrap;
-
-  @media (max-width: 768px) {
-    padding: 16px 20px;
-  }
 `;
 
 const HeaderLeft = styled.div`
@@ -68,23 +60,11 @@ const MenuButton = styled.button`
   cursor: pointer;
   padding: 8px;
   border-radius: 8px;
-  display: flex;
-  align-items: center;
-
-  &:hover {
-    background: ${(p) => p.theme.bgTertiary};
-  }
-`;
-
-const HeaderTitle = styled.div`
-  display: flex;
-  flex-direction: column;
 `;
 
 const Title = styled.h1`
   margin: 0;
   font-size: 24px;
-  color: ${(p) => p.theme.text};
 `;
 
 const Subtitle = styled.p`
@@ -93,25 +73,14 @@ const Subtitle = styled.p`
   color: ${(p) => p.theme.textSecondary};
 `;
 
+const HeaderTitle = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
 const HeaderRight = styled.div`
   display: flex;
   gap: 12px;
-  align-items: center;
-`;
-
-const Main = styled.div`
-  flex: 1;
-  padding: 32px;
-  animation: ${fadeIn} 0.5s ease;
-
-  @media (max-width: 768px) {
-    padding: 20px;
-  }
-`;
-
-const Container = styled.div`
-  padding: 30px;
-  animation: ${fadeIn} 0.3s ease;
 `;
 
 const Button = styled.button`
@@ -122,11 +91,21 @@ const Button = styled.button`
   border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
-  margin-right: 10px;
 
   &:hover {
     filter: brightness(0.9);
   }
+`;
+
+const Main = styled.div`
+  flex: 1;
+  padding: 32px;
+  animation: ${fadeIn} 0.5s ease;
+`;
+
+const Container = styled.div`
+  padding: 30px;
+  animation: ${fadeIn} 0.3s ease;
 `;
 
 const TableWrapper = styled.div`
@@ -174,66 +153,6 @@ const TipoTag = styled.span`
       : "#2e8b00"};
 `;
 
-const ModalBg = styled.div`
-  position: fixed;
-  inset: 0;
-  background: #00000088;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  animation: ${fadeIn} 0.2s ease;
-`;
-
-const ModalBox = styled.div`
-  background: ${(p) => p.theme.cardBg};
-  padding: 25px;
-  border-radius: 14px;
-  width: 420px;
-  animation: ${modalFade} 0.2s ease;
-`;
-
-const Label = styled.label`
-  display: block;
-  margin-top: 12px;
-  font-weight: 600;
-`;
-
-const Input = styled.input`
-  width: 100%;
-  padding: 10px;
-  margin-top: 4px;
-  border-radius: 8px;
-  border: 1px solid #bbbbbb55;
-  background: ${(p) => p.theme.input};
-  color: ${(p) => p.theme.text};
-`;
-
-const Select = styled.select`
-  width: 100%;
-  padding: 10px;
-  margin-top: 4px;
-  border-radius: 8px;
-`;
-
-const SubmitBtn = styled(Button)`
-  width: 100%;
-  margin-top: 15px;
-`;
-
-const CancelBtn = styled.button`
-  width: 100%;
-  padding: 10px;
-  background: #999;
-  margin-top: 10px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-
-  &:hover {
-    filter: brightness(0.9);
-  }
-`;
-
 // =========================
 //       COMPONENTE
 // =========================
@@ -248,13 +167,23 @@ export default function Users() {
   const [loading, setLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // Modal Create
   const [showCreateModal, setShowCreateModal] = useState(false);
-
   const [createData, setCreateData] = useState({
     nome: "",
     email: "",
     senha: "",
     tipo: "aluno",
+  });
+
+  // Modal Edit
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editData, setEditData] = useState({
+    id: "",
+    nome: "",
+    email: "",
+    senha: "",
+    tipo: "",
   });
 
   // =========================
@@ -293,6 +222,7 @@ export default function Users() {
   // =========================
   const handleCreateUser = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     try {
       const res = await fetch("http://localhost:8000/users/", {
@@ -308,6 +238,7 @@ export default function Users() {
 
       if (!res.ok) {
         alert("Erro: " + response.detail);
+        setLoading(false);
         return;
       }
 
@@ -317,15 +248,83 @@ export default function Users() {
     } catch (err) {
       console.log(err);
     }
+
+    setLoading(false);
   };
 
+  // =========================
+  //     EDITAR USUÁRIO
+  // =========================
+  const handleEditUser = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const payload = { ...editData };
+    if (!payload.senha) delete payload.senha;
+
+    try {
+      const res = await fetch(
+        `http://localhost:8000/users/${editData.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      if (!res.ok) {
+        const error = await res.json();
+        alert(error.detail);
+        setLoading(false);
+        return;
+      }
+
+      setShowEditModal(false);
+      fetchUsers();
+    } catch (err) {
+      console.log(err);
+    }
+
+    setLoading(false);
+  };
+
+  // =========================
+  //     EXCLUIR USUÁRIO
+  // =========================
+  const handleDeleteUser = async (id) => {
+    if (!confirm("Tem certeza que deseja excluir?")) return;
+
+    try {
+      const res = await fetch(`http://localhost:8000/users/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        alert(error.detail);
+        return;
+      }
+
+      fetchUsers();
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  // =========================
+  //   LOGOUT
+  // =========================
   const handleLogout = () => {
     logout();
     nav("/login");
   };
 
   // =========================
-  //       UI
+  //         UI
   // =========================
   return (
     <Wrap>
@@ -368,7 +367,9 @@ export default function Users() {
             <Title>Usuários</Title>
 
             <Button onClick={fetchUsers}>Atualizar</Button>
-            <Button onClick={() => setShowCreateModal(true)}>Criar Usuário</Button>
+            <Button onClick={() => setShowCreateModal(true)}>
+              Criar Usuário
+            </Button>
 
             <TableWrapper>
               {loading ? (
@@ -381,6 +382,7 @@ export default function Users() {
                       <Th>Email</Th>
                       <Th>Tipo</Th>
                       <Th>Criado em</Th>
+                      <Th>Ações</Th>
                     </tr>
                   </thead>
 
@@ -392,7 +394,37 @@ export default function Users() {
                         <Td>
                           <TipoTag tipo={u.tipo}>{u.tipo}</TipoTag>
                         </Td>
-                        <Td>{new Date(u.criado_em).toLocaleString("pt-BR")}</Td>
+                        <Td>
+                          {new Date(u.criado_em).toLocaleString("pt-BR")}
+                        </Td>
+
+                        <Td>
+                          <Button
+                            style={{ marginRight: "10px", padding: "6px 12px" }}
+                            onClick={() => {
+                              setEditData({
+                                id: u.id,
+                                nome: u.nome,
+                                email: u.email,
+                                senha: "",
+                                tipo: u.tipo,
+                              });
+                              setShowEditModal(true);
+                            }}
+                          >
+                            Editar
+                          </Button>
+
+                          <Button
+                            style={{
+                              background: "#c0392b",
+                              padding: "6px 12px",
+                            }}
+                            onClick={() => handleDeleteUser(u.id)}
+                          >
+                            Excluir
+                          </Button>
+                        </Td>
                       </tr>
                     ))}
                   </tbody>
@@ -400,58 +432,27 @@ export default function Users() {
               )}
             </TableWrapper>
 
-            {/* === MODAL === */}
-            {showCreateModal && (
-              <ModalBg>
-                <ModalBox>
-                  <h2>Criar Usuário</h2>
+            {/* ======= CREATE MODAL ======= */}
+            <UserModal
+              open={showCreateModal}
+              onClose={() => setShowCreateModal(false)}
+              onSubmit={handleCreateUser}
+              data={createData}
+              setData={setCreateData}
+              mode="create"
+              loading={loading}
+            />
 
-                  <form onSubmit={handleCreateUser}>
-                    <Label>Nome</Label>
-                    <Input
-                      value={createData.nome}
-                      onChange={(e) =>
-                        setCreateData({ ...createData, nome: e.target.value })
-                      }
-                    />
-
-                    <Label>Email</Label>
-                    <Input
-                      value={createData.email}
-                      onChange={(e) =>
-                        setCreateData({ ...createData, email: e.target.value })
-                      }
-                    />
-
-                    <Label>Senha</Label>
-                    <Input
-                      type="password"
-                      value={createData.senha}
-                      onChange={(e) =>
-                        setCreateData({ ...createData, senha: e.target.value })
-                      }
-                    />
-
-                    <Label>Tipo</Label>
-                    <Select
-                      value={createData.tipo}
-                      onChange={(e) =>
-                        setCreateData({ ...createData, tipo: e.target.value })
-                      }
-                    >
-                      <option value="aluno">Aluno</option>
-                      <option value="professor">Professor</option>
-                      <option value="superadmin">Super Admin</option>
-                    </Select>
-
-                    <SubmitBtn type="submit">Criar</SubmitBtn>
-                    <CancelBtn onClick={() => setShowCreateModal(false)}>
-                      Cancelar
-                    </CancelBtn>
-                  </form>
-                </ModalBox>
-              </ModalBg>
-            )}
+            {/* ======= EDIT MODAL ======= */}
+            <UserModal
+              open={showEditModal}
+              onClose={() => setShowEditModal(false)}
+              onSubmit={handleEditUser}
+              data={editData}
+              setData={setEditData}
+              mode="edit"
+              loading={loading}
+            />
           </Container>
         </Main>
       </Content>
