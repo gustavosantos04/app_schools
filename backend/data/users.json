@@ -22,5 +22,13 @@
         "senha": "$2b$12$DfboEWk//SNVFlzH83jXY.uVYDOJEbVOKlWj6t9c9mQfXp8TU8qvi",
         "tipo": "aluno",
         "criado_em": "2025-11-10T22:42:16.265682"
+    },
+    {
+        "id": "5e63c82c-1dd3-48f8-8060-fcc885f4d2f5",
+        "nome": "Gabriela azzim",
+        "email": "gabriela@gmail.com",
+        "senha": "$2b$12$QrA0VdpELLadwvIeBmJB5OtmywxhzrHGD.8kcNs2sPJfl7Y5P4ZOa",
+        "tipo": "aluno",
+        "criado_em": "2025-12-07T00:55:03.147845"
     }
 ]

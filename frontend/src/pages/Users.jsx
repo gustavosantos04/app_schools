@@ -6,6 +6,7 @@ import { FiMenu, FiSun, FiMoon, FiLogOut } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import styled, { keyframes } from "styled-components";
 import UserModal from "../components/UserModal";
+import UsersTable from "../components/UsersTable";
 
 // =========================
 //    ANIMAÇÕES
@@ -91,6 +92,7 @@ const Button = styled.button`
   border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
+  margin-left: 8px;
 
   &:hover {
     filter: brightness(0.9);
@@ -111,46 +113,6 @@ const Container = styled.div`
 const TableWrapper = styled.div`
   margin-top: 20px;
   overflow-x: auto;
-`;
-
-const Table = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-  background: ${(p) => p.theme.cardBg};
-  border-radius: 10px;
-  overflow: hidden;
-`;
-
-const Th = styled.th`
-  padding: 12px;
-  background: ${(p) => p.theme.bgTertiary};
-  font-weight: 700;
-`;
-
-const Td = styled.td`
-  padding: 12px;
-  border-bottom: 1px solid ${(p) => p.theme.border};
-`;
-
-const TipoTag = styled.span`
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-weight: 600;
-  font-size: 13px;
-
-  background: ${(p) =>
-    p.tipo === "superadmin"
-      ? "#ff4d4d33"
-      : p.tipo === "professor"
-      ? "#4da6ff33"
-      : "#66cc3333"};
-
-  color: ${(p) =>
-    p.tipo === "superadmin"
-      ? "#d40000"
-      : p.tipo === "professor"
-      ? "#0066cc"
-      : "#2e8b00"};
 `;
 
 // =========================
@@ -218,10 +180,47 @@ export default function Users() {
   }, []);
 
   // =========================
+  //   ABRIR MODAL DE EDIÇÃO
+  // =========================
+  const handleEdit = (user) => {
+    setEditData({
+      id: user.id,
+      nome: user.nome,
+      email: user.email,
+      senha: "",
+      tipo: user.tipo,
+    });
+    setShowEditModal(true);
+  };
+
+  // =========================
+  //   EXCLUIR USUÁRIO
+  // =========================
+  const handleDelete = async (id) => {
+    if (!confirm("Tem certeza que deseja excluir?")) return;
+
+    try {
+      const res = await fetch(`http://localhost:8000/users/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        alert(error.detail);
+        return;
+      }
+
+      fetchUsers();
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  // =========================
   //   CRIAR USUÁRIO
   // =========================
   const handleCreateUser = async (e) => {
-    e.preventDefault();
     setLoading(true);
 
     try {
@@ -253,10 +252,9 @@ export default function Users() {
   };
 
   // =========================
-  //     EDITAR USUÁRIO
+  //   EDITAR USUÁRIO
   // =========================
   const handleEditUser = async (e) => {
-    e.preventDefault();
     setLoading(true);
 
     const payload = { ...editData };
@@ -292,31 +290,7 @@ export default function Users() {
   };
 
   // =========================
-  //     EXCLUIR USUÁRIO
-  // =========================
-  const handleDeleteUser = async (id) => {
-    if (!confirm("Tem certeza que deseja excluir?")) return;
-
-    try {
-      const res = await fetch(`http://localhost:8000/users/${id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (!res.ok) {
-        const error = await res.json();
-        alert(error.detail);
-        return;
-      }
-
-      fetchUsers();
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  // =========================
-  //   LOGOUT
+  //        LOGOUT
   // =========================
   const handleLogout = () => {
     logout();
@@ -364,75 +338,21 @@ export default function Users() {
 
         <Main>
           <Container>
-            <Title>Usuários</Title>
-
             <Button onClick={fetchUsers}>Atualizar</Button>
             <Button onClick={() => setShowCreateModal(true)}>
               Criar Usuário
             </Button>
 
             <TableWrapper>
-              {loading ? (
-                <p style={{ marginTop: 20 }}>Carregando...</p>
-              ) : (
-                <Table>
-                  <thead>
-                    <tr>
-                      <Th>Nome</Th>
-                      <Th>Email</Th>
-                      <Th>Tipo</Th>
-                      <Th>Criado em</Th>
-                      <Th>Ações</Th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    {users.map((u) => (
-                      <tr key={u.id}>
-                        <Td>{u.nome}</Td>
-                        <Td>{u.email}</Td>
-                        <Td>
-                          <TipoTag tipo={u.tipo}>{u.tipo}</TipoTag>
-                        </Td>
-                        <Td>
-                          {new Date(u.criado_em).toLocaleString("pt-BR")}
-                        </Td>
-
-                        <Td>
-                          <Button
-                            style={{ marginRight: "10px", padding: "6px 12px" }}
-                            onClick={() => {
-                              setEditData({
-                                id: u.id,
-                                nome: u.nome,
-                                email: u.email,
-                                senha: "",
-                                tipo: u.tipo,
-                              });
-                              setShowEditModal(true);
-                            }}
-                          >
-                            Editar
-                          </Button>
-
-                          <Button
-                            style={{
-                              background: "#c0392b",
-                              padding: "6px 12px",
-                            }}
-                            onClick={() => handleDeleteUser(u.id)}
-                          >
-                            Excluir
-                          </Button>
-                        </Td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
-              )}
+              <UsersTable
+                users={users}
+                loading={loading}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
             </TableWrapper>
 
-            {/* ======= CREATE MODAL ======= */}
+            {/* CREATE MODAL */}
             <UserModal
               open={showCreateModal}
               onClose={() => setShowCreateModal(false)}
@@ -443,7 +363,7 @@ export default function Users() {
               loading={loading}
             />
 
-            {/* ======= EDIT MODAL ======= */}
+            {/* EDIT MODAL */}
             <UserModal
               open={showEditModal}
               onClose={() => setShowEditModal(false)}

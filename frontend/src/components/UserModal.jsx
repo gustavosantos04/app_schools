@@ -264,14 +264,18 @@ export default function UserModal({ open, onClose, onSubmit, data, setData, mode
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // bloqueia se houver erro
+    // Se qualquer erro existir, bloqueia submit
     if (errors.nome || errors.email || errors.senha) return;
 
     setLoading(true);
-    await onSubmit();
-    setLoading(false);
-  };
 
+    try {
+      await onSubmit(data);  // <--- USANDO O NOME CORRETO
+    } finally {
+      setLoading(false);
+    }
+  };
+  
   if (!open) return null;
 
   return (
