@@ -213,7 +213,7 @@ export default function Sidebar({ open, setOpen, currentTab, setCurrentTab, user
 
   if (userType === "superadmin") {
     menuItems = [
-      { id: 'dashboard', label: 'Dashboard', icon: <FiHome />, path: '/dashboard' },
+      { id: 'dashboard', label: 'Dashboard', icon: <FiHome />, path: '/teacher' },
       { id: 'users', label: 'Usuários', icon: <FiUsers />, path: '/users' },
       { id: 'turmas', label: 'Turmas', icon: <FiUsers />, path: '/turmas' },
       { id: 'comunicados', label: 'Comunicados', icon: <FiMessageSquare />, path: '/comunicados' },
