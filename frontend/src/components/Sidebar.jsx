@@ -1,8 +1,12 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 import styled, { keyframes } from 'styled-components'
 import { FiHome, FiUsers, FiMessageSquare, FiDollarSign, FiBookOpen } from 'react-icons/fi'
 import { IoFootball } from 'react-icons/io5'
 
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   ANIMAÇÕES
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 const slideIn = keyframes`
   from { transform: translateX(-100%); }
   to { transform: translateX(0); }
@@ -13,6 +17,9 @@ const fadeIn = keyframes`
   to { opacity: 1; }
 `
 
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   ESTILOS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 const Overlay = styled.div`
   display: ${props => props.$open ? 'block' : 'none'};
   position: fixed;
@@ -144,15 +151,6 @@ const Menu = styled.div`
   flex-direction: column;
   gap: 4px;
   overflow-y: auto;
-  
-  &::-webkit-scrollbar {
-    width: 4px;
-  }
-  
-  &::-webkit-scrollbar-thumb {
-    background: ${props => props.theme.border};
-    border-radius: 2px;
-  }
 `
 
 const MenuItem = styled.div`
@@ -166,33 +164,9 @@ const MenuItem = styled.div`
   background: ${props => props.$active ? props.theme.primaryLight : 'transparent'};
   color: ${props => props.$active ? props.theme.primary : props.theme.text};
   font-weight: ${props => props.$active ? '600' : '500'};
-  font-size: 15px;
-  position: relative;
-  
-  &:hover {
-    background: ${props => props.$active ? props.theme.primaryLight : props.theme.bgTertiary};
-    transform: translateX(4px);
-  }
-  
-  ${props => props.$active && `
-    &::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 3px;
-      height: 20px;
-      background: ${props.theme.primary};
-      border-radius: 0 2px 2px 0;
-    }
-  `}
 `
 
 const MenuIcon = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
   font-size: 20px;
 `
 
@@ -212,39 +186,67 @@ const Version = styled.div`
   font-weight: 600;
 `
 
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   COMPONENTE SIDEBAR
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 export default function Sidebar({ open, setOpen, currentTab, setCurrentTab, user }) {
+  const navigate = useNavigate()
+
   const getInitials = (name) => {
     if (!name) return '?'
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
   }
-  
+
   const getRoleLabel = (role) => {
-    if (role === 'teacher') return 'Professor'
-    if (role === 'parent') return 'Responsável'
+    if (role === 'superadmin') return 'Super Admin'
+    if (role === 'professor') return 'Professor'
+    if (role === 'aluno') return 'Aluno'
     return role
   }
-  
-  // Menu para aluno/pai
-  const parentMenu = [
-    { id: 'dashboard', label: 'Dashboard', icon: <FiHome /> },
-    { id: 'comunicados', label: 'Comunicados', icon: <FiMessageSquare /> },
-    { id: 'vagas', label: 'Vagas', icon: <FiBookOpen /> },
-    { id: 'financeiro', label: 'Financeiro', icon: <FiDollarSign /> },
-  ]
 
-  // Menu para professor
-  const teacherMenu = [
-    { id: 'dashboard', label: 'Dashboard', icon: <FiHome /> },
-    { id: 'turmas', label: 'Turmas', icon: <FiUsers /> },
-    { id: 'comunicados', label: 'Comunicados', icon: <FiMessageSquare /> },
-    { id: 'pagamentos', label: 'Pagamentos', icon: <FiDollarSign /> },
-  ]
+  const userType = user?.tipo
 
-  const menuItems = user?.role === 'teacher' ? teacherMenu : parentMenu
+  /* ---------------------------
+      DEFININDO ROTAS CERTAS
+  --------------------------- */
+  let menuItems = []
 
+  if (userType === "superadmin") {
+    menuItems = [
+      { id: 'dashboard', label: 'Dashboard', icon: <FiHome />, path: '/dashboard' },
+      { id: 'users', label: 'Usuários', icon: <FiUsers />, path: '/users' },
+      { id: 'turmas', label: 'Turmas', icon: <FiUsers />, path: '/turmas' },
+      { id: 'comunicados', label: 'Comunicados', icon: <FiMessageSquare />, path: '/comunicados' },
+      { id: 'financeiro', label: 'Financeiro', icon: <FiDollarSign />, path: '/financeiro' },
+    ]
+  }
+
+  else if (userType === "professor") {
+    menuItems = [
+      { id: 'dashboard', label: 'Dashboard', icon: <FiHome />, path: '/teacher' },
+      { id: 'users', label: 'Usuários', icon: <FiUsers />, path: '/users' },
+      { id: 'turmas', label: 'Turmas', icon: <FiUsers />, path: '/teacher/turmas' },
+      { id: 'comunicados', label: 'Comunicados', icon: <FiMessageSquare />, path: '/teacher/comunicados' },
+      { id: 'financeiro', label: 'Financeiro', icon: <FiDollarSign />, path: '/teacher/financeiro' },
+    ]
+  }
+
+  else if (userType === "aluno") {
+    menuItems = [
+      { id: 'dashboard', label: 'Dashboard', icon: <FiHome />, path: '/parent' },
+      { id: 'comunicados', label: 'Comunicados', icon: <FiMessageSquare />, path: '/parent/comunicados' },
+      { id: 'vagas', label: 'Vagas', icon: <FiBookOpen />, path: '/parent/vagas' },
+      { id: 'financeiro', label: 'Financeiro', icon: <FiDollarSign />, path: '/parent/financeiro' },
+    ]
+  }
+
+  /* ---------------------------
+      RENDERIZAÇÃO
+  --------------------------- */
   return (
     <>
       <Overlay $open={open} onClick={() => setOpen(false)} />
+
       <Wrap $open={open}>
         <Header>
           <LogoIcon><IoFootball /></LogoIcon>
@@ -253,15 +255,15 @@ export default function Sidebar({ open, setOpen, currentTab, setCurrentTab, user
             <LogoSubtitle>Gestão Esportiva</LogoSubtitle>
           </LogoText>
         </Header>
-        
+
         <UserProfile>
-          <Avatar>{getInitials(user?.name)}</Avatar>
+          <Avatar>{getInitials(user?.nome)}</Avatar>
           <UserInfo>
-            <UserName>{user?.name || 'Usuário'}</UserName>
-            <UserRole>{getRoleLabel(user?.role)}</UserRole>
+            <UserName>{user?.nome || 'Usuário'}</UserName>
+            <UserRole>{getRoleLabel(userType)}</UserRole>
           </UserInfo>
         </UserProfile>
-        
+
         <Menu>
           {menuItems.map(item => (
             <MenuItem
@@ -269,6 +271,7 @@ export default function Sidebar({ open, setOpen, currentTab, setCurrentTab, user
               $active={currentTab === item.id}
               onClick={() => {
                 setCurrentTab(item.id)
+                navigate(item.path)
                 setOpen(false)
               }}
             >
@@ -277,7 +280,7 @@ export default function Sidebar({ open, setOpen, currentTab, setCurrentTab, user
             </MenuItem>
           ))}
         </Menu>
-        
+
         <Footer>
           <Version>v1.0.0</Version>
           <div>© 2025 SportsEdu</div>
